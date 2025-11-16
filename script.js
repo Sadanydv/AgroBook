@@ -1,53 +1,78 @@
-/* ---------- persistence & state ---------- */
-let quantities = JSON.parse(localStorage.getItem("quantities")) || [];
-let prices = JSON.parse(localStorage.getItem("prices")) || [];
-let historyStack = JSON.parse(localStorage.getItem("quantities_history")) || [];
-
-// When page loads, restore UI
-window.onload = function () {
-  if (localStorage.getItem("packSize")) {
-    document.getElementById("packSize").value =
-      localStorage.getItem("packSize");
-  }
-  if (localStorage.getItem("totalPackPrice")) {
-    document.getElementById("totalPackPrice").value =
-      localStorage.getItem("totalPackPrice");
-  }
-  if (localStorage.getItem("darkMode") === "true")
-    document.body.classList.add("dark");
-
-  renderPrices();
-  updateTotals();
+/* ---------- FIREBASE CONFIGURATION ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCT0tDz3HaGePuDAOThcU1IgI51_0wC4EA",
+  authDomain: "agrobook-f59e4.firebaseapp.com",
+  databaseURL: "https://agrobook-f59e4-default-rtdb.firebaseio.com",
+  projectId: "agrobook-f59e4",
+  storageBucket: "agrobook-f59e4.firebasestorage.app",
+  messagingSenderId: "818114876174",
+  appId: "1:818114876174:web:c04a92f8089da4c5e83d5f",
+  measurementId: "G-06KLWW8SSW",
 };
 
-/* ---------- helpers for localStorage ---------- */
-function saveQuantities() {
-  localStorage.setItem("quantities", JSON.stringify(quantities));
-  localStorage.setItem("quantities_history", JSON.stringify(historyStack));
-}
+// Initialize Firebase (compat version)
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-function savePrices() {
-  localStorage.setItem("prices", JSON.stringify(prices));
-}
+/* ---------- Local state ---------- */
+let quantities = [];
+let prices = [];
+let historyStack = [];
 
-/* ---------- push current snapshot for undo ---------- */
-function pushHistory() {
-  historyStack = historyStack || [];
-  historyStack.push(JSON.stringify(quantities));
-  if (historyStack.length > 30) historyStack.shift();
-  localStorage.setItem("quantities_history", JSON.stringify(historyStack));
-}
+/* ---------- Firebase References ---------- */
+const quantitiesRef = database.ref("quantities");
+const pricesRef = database.ref("prices");
+const settingsRef = database.ref("settings");
+
+/* ---------- Listen for real-time updates ---------- */
+quantitiesRef.on("value", (snapshot) => {
+  quantities = snapshot.val() || [];
+  updateTotals();
+  // Update checklist if it's open
+  if (document.getElementById("checklistModal").style.display === "block") {
+    showChecklist();
+  }
+});
+
+pricesRef.on("value", (snapshot) => {
+  prices = snapshot.val() || [];
+  renderPrices();
+});
+
+settingsRef.on("value", (snapshot) => {
+  const settings = snapshot.val() || {};
+  if (settings.packSize) {
+    document.getElementById("packSize").value = settings.packSize;
+  }
+  if (settings.totalPackPrice) {
+    document.getElementById("totalPackPrice").value = settings.totalPackPrice;
+  }
+  if (settings.darkMode) {
+    if (settings.darkMode === true) {
+      document.body.classList.add("dark");
+    } else {
+      document.body.classList.remove("dark");
+    }
+  }
+  updateTotals();
+});
+
+/* ---------- Page Load ---------- */
+window.onload = function () {
+  // Dark mode from localStorage (immediate load before Firebase)
+  if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
+  }
+};
 
 /* ---------- quantity operations ---------- */
 function addQuantity() {
   const qtyInput = document.getElementById("quantityInput");
   const qty = parseFloat(qtyInput.value);
   if (!isNaN(qty) && qty > 0) {
-    pushHistory();
     quantities.push(qty);
-    saveQuantities();
+    quantitiesRef.set(quantities); // Save to Firebase
     qtyInput.value = "";
-    updateTotals();
   }
   qtyInput.focus();
 }
@@ -83,18 +108,15 @@ function updatePricePerKg() {
   ).textContent = `Total Cost: Rs ${totalCost.toFixed(2)}`;
 }
 
-/* ---------- input handlers that persist ---------- */
+/* ---------- input handlers ---------- */
 function onPackSizeChange() {
-  localStorage.setItem("packSize", document.getElementById("packSize").value);
-  updateTotals();
+  const packSize = document.getElementById("packSize").value;
+  settingsRef.update({ packSize });
 }
 
 function onPackPriceChange() {
-  localStorage.setItem(
-    "totalPackPrice",
-    document.getElementById("totalPackPrice").value
-  );
-  updateTotals();
+  const totalPackPrice = document.getElementById("totalPackPrice").value;
+  settingsRef.update({ totalPackPrice });
 }
 
 /* ---------- Enter key ---------- */
@@ -116,42 +138,15 @@ document
     }
   });
 
-/* ---------- clear & undo ---------- */
+/* ---------- clear ---------- */
 function clearAll() {
   if (!confirm("Clear all quantities and pack price?")) return;
-  pushHistory();
   quantities = [];
-  saveQuantities();
+  quantitiesRef.set(quantities);
   document.getElementById("quantityInput").value = "";
   document.getElementById("totalPackPrice").value = "";
-  localStorage.removeItem("totalPackPrice");
-  document.getElementById("totalQty").textContent = "Total Quantity: 0 kg";
-  document.getElementById("pricePerKg").textContent = "Price per kg: Rs 0";
-  document.getElementById("totalCost").textContent = "Total Cost: Rs 0";
+  settingsRef.update({ totalPackPrice: "" });
   document.getElementById("quantityInput").focus();
-}
-
-function undo() {
-  const history =
-    JSON.parse(localStorage.getItem("quantities_history")) ||
-    historyStack ||
-    [];
-  if (history.length === 0) {
-    alert("Nothing to undo.");
-    return;
-  }
-  history.pop();
-  const prev = history.pop();
-  if (!prev) {
-    quantities = [];
-  } else {
-    quantities = JSON.parse(prev);
-  }
-  historyStack = history;
-  localStorage.setItem("quantities_history", JSON.stringify(historyStack));
-  saveQuantities();
-  updateTotals();
-  showChecklist();
 }
 
 /* ---------- price list box ---------- */
@@ -163,8 +158,7 @@ function addPrice() {
 
   if (name && !isNaN(price) && price >= 0) {
     prices.push({ name, price });
-    savePrices();
-    renderPrices();
+    pricesRef.set(prices);
     nameInput.value = "";
     priceInput.value = "";
     nameInput.focus();
@@ -194,8 +188,7 @@ function renderPrices() {
 function deletePrice(index) {
   if (!confirm("Delete this saved price?")) return;
   prices.splice(index, 1);
-  savePrices();
-  renderPrices();
+  pricesRef.set(prices);
 }
 
 function editPrice(index) {
@@ -204,15 +197,13 @@ function editPrice(index) {
   if (newName && !isNaN(newPrice) && newPrice >= 0) {
     prices[index].name = newName;
     prices[index].price = newPrice;
-    savePrices();
-    renderPrices();
+    pricesRef.set(prices);
   }
 }
 
 function sendPrice(index) {
   document.getElementById("totalPackPrice").value = prices[index].price;
-  localStorage.setItem("totalPackPrice", prices[index].price);
-  updatePricePerKg();
+  settingsRef.update({ totalPackPrice: prices[index].price });
 }
 
 /* ---------- checklist modal ---------- */
@@ -249,20 +240,16 @@ function editQuantity(index) {
     prompt("Enter new quantity (kg):", quantities[index])
   );
   if (!isNaN(newQty) && newQty > 0) {
-    pushHistory();
     quantities[index] = newQty;
-    saveQuantities();
-    updateTotals();
+    quantitiesRef.set(quantities);
     showChecklist();
   }
 }
 
 function deleteQuantity(index) {
   if (!confirm("Delete this quantity?")) return;
-  pushHistory();
   quantities.splice(index, 1);
-  saveQuantities();
-  updateTotals();
+  quantitiesRef.set(quantities);
   showChecklist();
 }
 
@@ -277,7 +264,9 @@ window.onclick = function (event) {
 /* ---------- dark mode ---------- */
 function toggleDarkMode() {
   document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+  const isDark = document.body.classList.contains("dark");
+  localStorage.setItem("darkMode", isDark);
+  settingsRef.update({ darkMode: isDark });
 }
 
 /* ---------- printing ---------- */
@@ -304,7 +293,7 @@ function printChecklist() {
   w.close();
 }
 
-/* ---------- export CSV (Excel-friendly) ---------- */
+/* ---------- export CSV ---------- */
 function exportCSV() {
   const rows = [];
   rows.push(["Item", "Value"]);
