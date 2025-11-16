@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Customer Calculator</title>
+  <title>Multi-Customer Record Calculation</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="mainContainer">
     <marquee direction="right" behavior="scroll" scrollamount="10" width="100%" class="mainHeading">
-      Sanjay Kharid Bikri Kendra - Multi Customer
+      Sanjay Kharid Bikri Kendra
     </marquee>
     
     <!-- Customer Selection Section -->
@@ -19,7 +19,6 @@
         <button onclick="showAddCustomerModal()" class="add-customer-btn">➕ Add Customer</button>
       </div>
       <div id="customerList" class="customer-list">
-        <!-- Customers will be loaded here -->
       </div>
       <div id="currentCustomerName" class="current-customer">
         Select a customer to begin
@@ -88,7 +87,7 @@
           <input type="text" id="newCustomerName" placeholder="Enter customer name" />
         </div>
         <div class="input-row">
-          <input type="tel" id="newCustomerPhone" placeholder="Enter phone number (optional)" />
+          <input type="tel" id="newCustomerPhone" placeholder="Enter text(optional)" />
         </div>
         <button onclick="addCustomer()" class="addButton" style="width: 100%;">Create Customer</button>
       </div>

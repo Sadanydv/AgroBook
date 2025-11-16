@@ -380,7 +380,7 @@ function showChecklist() {
   // Set customer name
   document.getElementById(
     "checklistCustomerName"
-  ).textContent = `📋 ${customer.name} - Quantity Checklist`;
+  ).textContent = `📋 ${customer.name} ( ${customer.phone})`;
 
   // Render quantities
   list.innerHTML = "";
