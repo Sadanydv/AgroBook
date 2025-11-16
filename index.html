@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Quantity Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="mainContainer">
+    <marquee direction="right" behavior="scroll" scrollamount="10" width="100%" class="mainHeading" >
+        Sanjay Kharid Bikri Kendra
+      </marquee>      
+    <div class="container">
+        <!-- Main Calculator -->
+        <div class="calculator">
+          <h2>Product Quantity Calculator</h2>
+    
+          <div class="input-row">
+            <input type="number" id="quantityInput" placeholder="Enter quantity (kg)" />
+            <button onclick="addQuantity()">Add</button>
+          </div>
+    
+          <div class="input-row">
+            <label for="packSize">Select Pack:</label>
+            <select id="packSize" onchange="onPackSizeChange()">
+              <option value="40">40 kg pack</option>
+              <option value="100">100 kg pack</option>
+            </select>
+          </div>
+    
+          <div class="input-row">
+            <input type="number" id="totalPackPrice" placeholder="Enter total pack price (Rs)" oninput="onPackPriceChange()" />
+          </div>
+    
+          <div class="input-row controls-row">
+            <button onclick="clearAll()" class="clear-btn">Clear</button>
+            <button onclick="showChecklist()" class="checklist-btn">Checklist</button>
+    
+          </div>
+    
+          <div class="input-row controls-row">
+            <button onclick="toggleDarkMode()" class="dark-btn">Toggle Dark</button>
+            <button onclick="exportCSV()" class="export-btn">Export CSV</button>
+            <button onclick="printChecklist()" class="print-btn">Print</button>
+            <button onclick="showGraph()" class="graph-btn">Show Graph</button>
+          </div>
+    
+          <div class="output">
+            <p id="totalQty">Total Quantity: 0 kg</p>
+            <p id="pricePerKg">Price per kg: Rs 0</p>
+            <p id="totalCost">Total Cost: Rs 0</p>
+          </div>
+        </div>
+    
+        <!-- Price List Box -->
+        <div class="price-box">
+          <h2>Saved Pack Prices</h2>
+          <div class="input-row">
+            <input type="text" id="priceName" placeholder="Pack name or description" />
+            <input type="number" id="priceValue" placeholder="Price (Rs)" />
+            <button onclick="addPrice()" class="addButton">Add</button>
+          </div>
+          <ul id="priceList"></ul>
+        </div>
+      </div>
+    
+      <!-- Modal for Quantity Checklist -->
+      <div id="checklistModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeChecklist()">&times;</span>
+          <h3>Quantity Checklist</h3>
+          <ol id="checklistItems"></ol>
+        </div>
+      </div>
+    
+      <!-- Graph Modal -->
+      <div id="graphModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeGraph()">&times;</span>
+          <h3>Quantities Graph</h3>
+          <canvas id="quantChart" width="400" height="250"></canvas>
+        </div>
+      </div>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
