@@ -1,7 +1,7 @@
 /* ---------- persistence & state ---------- */
 let quantities = JSON.parse(localStorage.getItem("quantities")) || [];
 let prices = JSON.parse(localStorage.getItem("prices")) || [];
-let historyStack = JSON.parse(localStorage.getItem("quantities_history")) || []; // for undo
+let historyStack = JSON.parse(localStorage.getItem("quantities_history")) || [];
 
 // When page loads, restore UI
 window.onload = function () {
@@ -23,16 +23,15 @@ window.onload = function () {
 /* ---------- helpers for localStorage ---------- */
 function saveQuantities() {
   localStorage.setItem("quantities", JSON.stringify(quantities));
-  // keep history too
   localStorage.setItem("quantities_history", JSON.stringify(historyStack));
 }
+
 function savePrices() {
   localStorage.setItem("prices", JSON.stringify(prices));
 }
 
 /* ---------- push current snapshot for undo ---------- */
 function pushHistory() {
-  // store last snapshot (cap history length)
   historyStack = historyStack || [];
   historyStack.push(JSON.stringify(quantities));
   if (historyStack.length > 30) historyStack.shift();
@@ -89,6 +88,7 @@ function onPackSizeChange() {
   localStorage.setItem("packSize", document.getElementById("packSize").value);
   updateTotals();
 }
+
 function onPackPriceChange() {
   localStorage.setItem(
     "totalPackPrice",
@@ -106,6 +106,7 @@ document
       addQuantity();
     }
   });
+
 document
   .getElementById("priceValue")
   .addEventListener("keypress", function (e) {
@@ -131,7 +132,6 @@ function clearAll() {
 }
 
 function undo() {
-  // revert last snapshot
   const history =
     JSON.parse(localStorage.getItem("quantities_history")) ||
     historyStack ||
@@ -140,15 +140,13 @@ function undo() {
     alert("Nothing to undo.");
     return;
   }
-  // pop last (current) and set to previous (if exists)
-  history.pop(); // remove current snapshot
-  const prev = history.pop(); // get previous (the one before last)
+  history.pop();
+  const prev = history.pop();
   if (!prev) {
     quantities = [];
   } else {
     quantities = JSON.parse(prev);
   }
-  // save updated history & quantities
   historyStack = history;
   localStorage.setItem("quantities_history", JSON.stringify(historyStack));
   saveQuantities();
@@ -225,7 +223,7 @@ function showChecklist() {
 
   if (quantities.length === 0) {
     list.innerHTML =
-      '<p style="text-align:center; color:var(--muted);">No quantities added yet.</p>';
+      '<p style="text-align:center; color:#888;">No quantities added yet.</p>';
   } else {
     quantities.forEach((qty, i) => {
       const li = document.createElement("li");
@@ -284,7 +282,6 @@ function toggleDarkMode() {
 
 /* ---------- printing ---------- */
 function printChecklist() {
-  // create printable window
   const w = window.open("", "_blank", "width=800,height=600");
   const totalQty = document.getElementById("totalQty").textContent;
   const pricePerKg = document.getElementById("pricePerKg").textContent;
@@ -318,7 +315,6 @@ function exportCSV() {
   const totalPackPrice = document.getElementById("totalPackPrice").value || "";
   rows.push(["Pack Size", packSize + " kg"]);
   rows.push(["Pack Price (Rs)", totalPackPrice]);
-  // pricePerKg and totalCost:
   const pricePerKgText = document.getElementById("pricePerKg").textContent;
   const totalCostText = document.getElementById("totalCost").textContent;
   rows.push([pricePerKgText, ""]);
@@ -328,7 +324,6 @@ function exportCSV() {
   rows.push(["Name", "Price"]);
   prices.forEach((p) => rows.push([p.name, p.price]));
 
-  // convert to CSV string
   const csvContent = rows
     .map((r) =>
       r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
@@ -351,6 +346,7 @@ function exportCSV() {
 
 /* ---------- graph modal ---------- */
 let chartInstance = null;
+
 function showGraph() {
   const modal = document.getElementById("graphModal");
   modal.style.display = "block";
@@ -390,6 +386,7 @@ function renderChart() {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       scales: {
         y: { beginAtZero: true },
       },
