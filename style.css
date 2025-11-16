@@ -38,6 +38,123 @@ body {
   width: 100%;
 }
 
+/* Customer Section */
+.customer-section {
+  background: white;
+  padding: 20px;
+  border-radius: 22px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.customer-header h2 {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  margin: 0;
+}
+
+.add-customer-btn {
+  background: linear-gradient(135deg, #130a0a92, #ff0202);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.3s ease;
+}
+
+.add-customer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3);
+}
+
+.customer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.customer-card {
+  background: #eef2ff;
+  padding: 15px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.customer-card:hover {
+  background: #dde6ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.customer-card.active {
+  background: #24405f;
+  color: white;
+  border: 2px solid #0078ff;
+}
+
+.customer-card h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+}
+
+.customer-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.customer-card .delete-customer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #9b0b0e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.2s ease;
+}
+
+.customer-card:hover .delete-customer {
+  opacity: 1;
+}
+
+.customer-card .delete-customer:hover {
+  background: #d9363e;
+  transform: scale(1.1);
+}
+
+.current-customer {
+  background: linear-gradient(135deg, #0078ff, #005dcc);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
 /* Main Boxes */
 .calculator, .price-box {
   background: white;
@@ -86,6 +203,11 @@ input, select, button {
   min-width: 100px;
 }
 
+input:disabled, select:disabled, button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 #quantityInput {
   flex: 2;
 }
@@ -116,12 +238,12 @@ button {
   white-space: nowrap;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background: #08294f;
   transform: scale(1.03);
 }
 
-button:active {
+button:active:not(:disabled) {
   transform: scale(0.98);
 }
 
@@ -129,7 +251,7 @@ button:active {
   background: #9b0b0e;
 }
 
-.clear-btn:hover {
+.clear-btn:hover:not(:disabled) {
   background: #d9363e;
 }
 
@@ -137,7 +259,7 @@ button:active {
   background: #462a42;
 }
 
-.checklist-btn:hover {
+.checklist-btn:hover:not(:disabled) {
   background: #170f1c;
 }
 
@@ -227,7 +349,7 @@ button:active {
   white-space: nowrap;
 }
 
-/* Modal (Checklist) */
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -257,6 +379,7 @@ button:active {
 #checklistItems {
   padding-left: 22px;
   list-style-position: inside;
+  margin-bottom: 20px;
 }
 
 #checklistItems li {
@@ -285,6 +408,36 @@ button:active {
   font-size: 13px;
   min-width: auto;
   white-space: nowrap;
+}
+
+/* Checklist Summary */
+.checklist-summary {
+  background: linear-gradient(135deg, #eef2ff, #f7f9ff);
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+  border: 2px solid #0078ff;
+}
+
+.checklist-summary p {
+  margin: 8px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+#checklistTotalAmount {
+  background: #414a53;
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+#checklistCustomerName {
+  color: #0078ff;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 /* Animation */
@@ -337,11 +490,11 @@ button:active {
   transition: 0.5s;
 }
 
-.addButton:hover::after {
+.addButton:hover:not(:disabled)::after {
   left: 110%;
 }
 
-.addButton:hover {
+.addButton:hover:not(:disabled) {
   transform: translateY(-3px);
 }
 
@@ -360,7 +513,8 @@ body.dark {
 }
 
 body.dark .calculator,
-body.dark .price-box {
+body.dark .price-box,
+body.dark .customer-section {
   background: #161b22;
   color: white;
   box-shadow: 0 10px 25px rgba(0,0,0,0.6);
@@ -383,8 +537,14 @@ body.dark .output {
 }
 
 body.dark #priceList li,
-body.dark #checklistItems li {
+body.dark #checklistItems li,
+body.dark .customer-card {
   background: #1e2630;
+  color: white;
+}
+
+body.dark .customer-card.active {
+  background: #24405f;
   color: white;
 }
 
@@ -397,12 +557,26 @@ body.dark .close {
   color: #ccc;
 }
 
-body.dark #totalCost {
+body.dark #totalCost,
+body.dark #checklistTotalAmount {
   background: #005dcc;
 }
 
 body.dark .item-info {
   color: white;
+}
+
+body.dark .checklist-summary {
+  background: linear-gradient(135deg, #1e2630, #131820);
+  border-color: #005dcc;
+}
+
+body.dark .checklist-summary p {
+  color: white;
+}
+
+body.dark #checklistCustomerName {
+  color: #4da6ff;
 }
 
 /* Media Queries */
@@ -420,6 +594,10 @@ body.dark .item-info {
   .mainContainer {
     gap: 40px;
   }
+
+  .customer-section {
+    padding: 30px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -427,7 +605,7 @@ body.dark .item-info {
     padding: 10px;
   }
 
-  .calculator, .price-box {
+  .calculator, .price-box, .customer-section {
     padding: 15px;
   }
 
@@ -447,6 +625,10 @@ body.dark .item-info {
 
   h2 {
     margin-bottom: 15px;
+  }
+
+  .customer-list {
+    grid-template-columns: 1fr;
   }
 
   /* Stack price list items on very small screens */

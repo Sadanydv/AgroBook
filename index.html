@@ -3,47 +3,61 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Quantity Calculator</title>
+  <title>Multi-Customer Calculator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="mainContainer">
     <marquee direction="right" behavior="scroll" scrollamount="10" width="100%" class="mainHeading">
-      Sanjay Kharid Bikri Kendra
+      Sanjay Kharid Bikri Kendra - Multi Customer
     </marquee>
     
+    <!-- Customer Selection Section -->
+    <div class="customer-section">
+      <div class="customer-header">
+        <h2>📋 Customers</h2>
+        <button onclick="showAddCustomerModal()" class="add-customer-btn">➕ Add Customer</button>
+      </div>
+      <div id="customerList" class="customer-list">
+        <!-- Customers will be loaded here -->
+      </div>
+      <div id="currentCustomerName" class="current-customer">
+        Select a customer to begin
+      </div>
+    </div>
+
     <div class="container">
       <!-- Main Calculator -->
       <div class="calculator">
         <h2>Product Quantity Calculator</h2>
   
         <div class="input-row">
-          <input type="number" id="quantityInput" placeholder="Enter quantity (kg)" />
-          <button onclick="addQuantity()">Add</button>
+          <input type="number" id="quantityInput" placeholder="Enter quantity (kg)" disabled />
+          <button onclick="addQuantity()" id="addBtn" disabled>Add</button>
         </div>
   
         <div class="input-row">
           <label for="packSize">Select Pack:</label>
-          <select id="packSize" onchange="onPackSizeChange()">
+          <select id="packSize" onchange="onPackSizeChange()" disabled>
             <option value="40">40 kg pack</option>
             <option value="100">100 kg pack</option>
           </select>
         </div>
   
         <div class="input-row">
-          <input type="number" id="totalPackPrice" placeholder="Enter total pack price (Rs)" oninput="onPackPriceChange()" />
+          <input type="number" id="totalPackPrice" placeholder="Enter total pack price (Rs)" oninput="onPackPriceChange()" disabled />
         </div>
   
         <div class="input-row controls-row">
-          <button onclick="clearAll()" class="clear-btn">Clear</button>
-          <button onclick="showChecklist()" class="checklist-btn">Checklist</button>
+          <button onclick="clearAll()" class="clear-btn" disabled id="clearBtn">Clear</button>
+          <button onclick="showChecklist()" class="checklist-btn" disabled id="checklistBtn">Checklist</button>
         </div>
   
         <div class="input-row controls-row">
           <button onclick="toggleDarkMode()" class="dark-btn">Toggle Dark</button>
-          <button onclick="exportCSV()" class="export-btn">Export CSV</button>
-          <button onclick="printChecklist()" class="print-btn">Print</button>
-          <button onclick="showGraph()" class="graph-btn">Show Graph</button>
+          <button onclick="exportCSV()" class="export-btn" disabled id="exportBtn">Export CSV</button>
+          <button onclick="printChecklist()" class="print-btn" disabled id="printBtn">Print</button>
+          <button onclick="showGraph()" class="graph-btn" disabled id="graphBtn">Show Graph</button>
         </div>
   
         <div class="output">
@@ -59,18 +73,37 @@
         <div class="input-row">
           <input type="text" id="priceName" placeholder="Pack name" />
           <input type="number" id="priceValue" placeholder="Price (Rs)" />
-          <button onclick="addPrice()" class="addButton">Add</button>
+          <button onclick="addPrice()" class="addButton" id="addPriceBtn">Add</button>
         </div>
         <ul id="priceList"></ul>
       </div>
     </div>
   
+    <!-- Add Customer Modal -->
+    <div id="addCustomerModal" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closeAddCustomerModal()">&times;</span>
+        <h3>Add New Customer</h3>
+        <div class="input-row">
+          <input type="text" id="newCustomerName" placeholder="Enter customer name" />
+        </div>
+        <div class="input-row">
+          <input type="tel" id="newCustomerPhone" placeholder="Enter phone number (optional)" />
+        </div>
+        <button onclick="addCustomer()" class="addButton" style="width: 100%;">Create Customer</button>
+      </div>
+    </div>
+
     <!-- Modal for Quantity Checklist -->
     <div id="checklistModal" class="modal">
       <div class="modal-content">
         <span class="close" onclick="closeChecklist()">&times;</span>
-        <h3>Quantity Checklist</h3>
+        <h3 id="checklistCustomerName">Quantity Checklist</h3>
         <ol id="checklistItems"></ol>
+        <div class="checklist-summary">
+          <p id="checklistTotalQty">Total Quantity: 0 kg</p>
+          <p id="checklistTotalAmount">Total Amount: Rs 0</p>
+        </div>
       </div>
     </div>
   
