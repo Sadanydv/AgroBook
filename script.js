@@ -14,6 +14,133 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
+/* ---------- Admin Credentials (stored in Firebase) ---------- */
+const adminCredsRef = database.ref("adminCredentials");
+
+/* ---------- Authentication ---------- */
+let isAuthenticated = false;
+
+function checkAuthentication() {
+  const authToken = sessionStorage.getItem("authToken");
+  if (authToken === "authenticated_admin") {
+    isAuthenticated = true;
+    showMainApp();
+  } else {
+    showLoginScreen();
+  }
+}
+
+function showLoginScreen() {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display = "none";
+  document.getElementById("loginUserId").focus();
+}
+
+function showMainApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("mainApp").style.display = "flex";
+}
+
+function handleLogin() {
+  const userId = document.getElementById("loginUserId").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const errorElement = document.getElementById("loginError");
+
+  if (!userId || !password) {
+    errorElement.textContent = "Please enter both User ID and Password";
+    return;
+  }
+
+  // Check credentials from Firebase
+  adminCredsRef
+    .once("value", (snapshot) => {
+      const credentials = snapshot.val();
+
+      // If no credentials exist in Firebase, set default ones
+      if (!credentials) {
+        const defaultCreds = {
+          userId: "admin",
+          password: "admin123",
+        };
+        adminCredsRef.set(defaultCreds);
+
+        if (userId === "admin" && password === "admin123") {
+          loginSuccess();
+        } else {
+          errorElement.textContent = "Invalid User ID or Password";
+        }
+      } else {
+        // Check against stored credentials
+        if (
+          userId === credentials.userId &&
+          password === credentials.password
+        ) {
+          loginSuccess();
+        } else {
+          errorElement.textContent = "Invalid User ID or Password";
+        }
+      }
+    })
+    .catch((error) => {
+      errorElement.textContent =
+        "Error checking credentials. Please try again.";
+      console.error("Login error:", error);
+    });
+}
+
+function loginSuccess() {
+  sessionStorage.setItem("authToken", "authenticated_admin");
+  isAuthenticated = true;
+  document.getElementById("loginError").textContent = "";
+  document.getElementById("loginUserId").value = "";
+  document.getElementById("loginPassword").value = "";
+  showMainApp();
+}
+
+function handleLogout() {
+  if (confirm("Are you sure you want to logout?")) {
+    sessionStorage.removeItem("authToken");
+    isAuthenticated = false;
+
+    // Unsubscribe from all Firebase listeners
+    if (currentCustomerId) {
+      database.ref(`customers/${currentCustomerId}`).off();
+    }
+    customersRef.off();
+    sharedPricesRef.off();
+
+    currentCustomerId = null;
+    customers = {};
+    customerData = {};
+
+    showLoginScreen();
+  }
+}
+
+// Enter key support for login
+document.addEventListener("DOMContentLoaded", function () {
+  const loginUserId = document.getElementById("loginUserId");
+  const loginPassword = document.getElementById("loginPassword");
+
+  if (loginUserId) {
+    loginUserId.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        loginPassword.focus();
+      }
+    });
+  }
+
+  if (loginPassword) {
+    loginPassword.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleLogin();
+      }
+    });
+  }
+});
+
 /* ---------- State ---------- */
 let currentCustomerId = null;
 let customers = {};
@@ -26,12 +153,14 @@ const sharedPricesRef = database.ref("sharedPrices");
 
 /* ---------- Listen for customers list ---------- */
 customersRef.on("value", (snapshot) => {
+  if (!isAuthenticated) return; // Only update if authenticated
   customers = snapshot.val() || {};
   renderCustomerList();
 });
 
 /* ---------- Listen for shared prices ---------- */
 sharedPricesRef.on("value", (snapshot) => {
+  if (!isAuthenticated) return; // Only update if authenticated
   sharedPrices = snapshot.val() || [];
   renderPrices(sharedPrices);
 });
@@ -41,6 +170,9 @@ window.onload = function () {
   if (localStorage.getItem("darkMode") === "true") {
     document.body.classList.add("dark");
   }
+
+  // Check authentication on page load
+  checkAuthentication();
 };
 
 /* ---------- Customer Management ---------- */
@@ -378,9 +510,10 @@ function showChecklist() {
   const customer = customers[currentCustomerId];
 
   // Set customer name
-  document.getElementById(
-    "checklistCustomerName"
-  ).textContent = `📋 ${customer.name} ( ${customer.phone})`;
+  document.getElementById("checklistCustomerName").textContent =
+    customer.phone && customer.phone.trim() !== ""
+      ? `📋 ${customer.name} (${customer.phone})`
+      : `📋 ${customer.name}`;
 
   // Render quantities
   list.innerHTML = "";

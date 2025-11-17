@@ -16,11 +16,151 @@ body {
   transition: 0.3s ease;
 }
 
+/* Login Screen */
+.login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.login-container {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 400px;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.login-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.input-group input {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none;
+}
+
+.login-error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  text-align: center;
+  min-height: 20px;
+  margin: 0;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+/* App Header with Logout */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #45110c, #c0392b);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
 .mainHeading {
   color: rgb(255, 254, 254);
   font-size: clamp(18px, 4vw, 24px);
   text-align: center;
   padding: 10px;
+  flex: 1;
 }
 
 .mainContainer {
@@ -61,7 +201,7 @@ body {
 }
 
 .add-customer-btn {
-  background: linear-gradient(135deg, #130a0a92, #ff0202);
+  background: linear-gradient(135deg, #04000092, #ff0202);
   color: white;
   padding: 10px 20px;
   border: none;
@@ -146,7 +286,7 @@ body {
 }
 
 .current-customer {
-  background: linear-gradient(135deg, #344252, #005dcc);
+  background: linear-gradient(135deg, #232f3e, #005dcc);
   color: white;
   padding: 12px 20px;
   border-radius: 10px;
@@ -293,8 +433,8 @@ button:active:not(:disabled) {
 }
 
 #totalCost {
-  background: #414a53;
-  color: white;
+  background: #030d18;
+  color: rgb(255, 255, 255);
   font-weight: 700;
   font-size: clamp(1.1rem, 3.5vw, 1.4rem);
   padding: 12px;
@@ -427,7 +567,7 @@ button:active:not(:disabled) {
 }
 
 #checklistTotalAmount {
-  background: #414a53;
+  background: #0a121a;
   color: white;
   padding: 10px;
   border-radius: 8px;
@@ -510,6 +650,29 @@ button:active:not(:disabled) {
 /* Dark Mode */
 body.dark {
   background: #0d1117;
+}
+
+body.dark .login-container {
+  background: #161b22;
+  color: white;
+}
+
+body.dark .login-container h1 {
+  color: white;
+}
+
+body.dark .login-subtitle {
+  color: #ccc;
+}
+
+body.dark .input-group label {
+  color: white;
+}
+
+body.dark .input-group input {
+  background: #0d1117;
+  color: white;
+  border-color: #444;
 }
 
 body.dark .calculator,
@@ -603,6 +766,19 @@ body.dark #checklistCustomerName {
 @media (max-width: 480px) {
   body {
     padding: 10px;
+  }
+
+  .login-container {
+    padding: 30px 20px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mainHeading {
+    width: 100% !important;
   }
 
   .calculator, .price-box, .customer-section {
